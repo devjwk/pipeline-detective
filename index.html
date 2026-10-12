@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#090d16">
+  <meta name="description" content="Solve four RISC-V pipeline hazards, then inspect the cycle-by-cycle evidence.">
+  <title>Pipeline Detective · CPU Debugging Puzzles</title>
+  <link rel="stylesheet" href="src/style.css">
+  <script type="module" src="src/app.js"></script>
+</head>
+<body>
+  <div class="site-shell">
+    <aside class="sidebar">
+      <a class="wordmark" href="index.html" aria-label="Pipeline Detective home"><span class="wordmark-mark">PD<span class="mark-dot">.</span></span><span class="wordmark-type">PIPELINE<br>DETECTIVE</span></a>
+      <div class="side-rule"></div>
+      <div class="side-heading"><span class="micro" data-i18n="caseFile">CASE FILES</span><span id="progress-count">00 / 04</span></div>
+      <nav id="puzzle-nav" aria-label="Puzzle cases"></nav>
+      <div class="sidebar-foot"><span class="signal"><i></i><span data-i18n="localSimulation">LOCAL SIMULATION</span></span><p data-i18n="sidebarNote">이 퍼즐은 교육용 5단계 파이프라인 모델을 사용합니다. 원본 RTL과의 연결은 각 사건에서 확인하세요.</p></div>
+    </aside>
+
+    <div class="main-column">
+      <header class="topbar"><div class="topbar-left"><span class="eyebrow">SYSTEMS / INTERACTIVE LAB</span><span class="topbar-divider">/</span><span data-i18n="topLabel">CPU DEBUGGING PUZZLES</span></div><div class="lang-switch" role="group" aria-label="Language"><button type="button" data-lang="ko" aria-pressed="true">KO</button><button type="button" data-lang="en" aria-pressed="false">EN</button></div></header>
+
+      <main>
+        <section class="hero"><div class="hero-overline"><span class="hero-index">// <span id="case-number">01</span></span><span id="case-type">DATA HAZARD</span></div><h1 id="case-title"></h1><p id="case-premise" class="hero-description"></p><div class="hero-meta"><span class="meta-chip"><span class="meta-led"></span><span id="mode-label"></span></span><span class="meta-chip" data-i18n="fiveStages">5 STAGES · IF / ID / EX / MEM / WB</span></div></section>
+
+        <div class="workbench">
+          <section class="puzzle-panel" aria-labelledby="challenge-heading"><div class="section-title"><span class="section-number">01</span><h2 id="challenge-heading" data-i18n="inspectCode">INSPECT THE CODE</h2><span class="section-tail">RV32I / ASM</span></div><div class="code-window"><div class="code-top"><span class="file-tab">program.s</span><span class="code-status"><i></i> LIVE TRACE</span></div><div id="code-lines" class="code-lines"></div></div><div class="variant-controls"><span id="variant-number">EXAMPLE 01</span><button id="new-variant" type="button" data-i18n="newVariant">새 코드 받기 ↗</button></div><div class="source-line"><span data-i18n="sourceLabel">SOURCE REFERENCE</span><a id="source-link" target="_blank" rel="noopener noreferrer"></a></div>
+
+            <div class="section-title question-title"><span class="section-number">02</span><h2 data-i18n="makeCall">MAKE YOUR CALL</h2></div><p id="case-question" class="question"></p><div id="options" class="options" role="radiogroup" aria-label="Answer options"></div><button id="run-button" class="run-button" type="button"><span data-i18n="runPipeline">RUN PIPELINE</span><span aria-hidden="true">↗</span></button><div id="feedback" class="feedback" role="status" aria-live="polite"></div>
+          </section>
+
+          <section class="trace-panel" aria-labelledby="trace-heading"><div class="section-title"><span class="section-number">03</span><h2 id="trace-heading" data-i18n="cycleTrace">CYCLE TRACE</h2><span class="section-tail">CLK / 01—08</span></div><div class="trace-intro"><p data-i18n="traceIntro">답을 고르고 파이프라인을 실행하세요. 클록을 이동하면 명령이 있는 단계를 확인할 수 있습니다.</p><div class="trace-controls"><button id="prev-cycle" type="button" aria-label="Previous cycle">←</button><strong id="cycle-label">CLK 01</strong><button id="next-cycle" type="button" aria-label="Next cycle">→</button></div></div><div id="trace-mode" class="trace-mode" hidden></div><div id="timeline" class="timeline-wrap"></div><div class="legend"><span><i class="legend-safe"></i><span data-i18n="legendActive">ACTIVE</span></span><span><i class="legend-bubble"></i><span data-i18n="legendBubble">BUBBLE</span></span><span><i class="legend-danger"></i><span data-i18n="legendHazard">HAZARD / FLUSH</span></span></div><section class="value-trace" aria-labelledby="value-trace-heading"><div class="value-trace-title"><h3 id="value-trace-heading" data-i18n="valueTrace">클록별 값 추적</h3><span id="value-trace-cycle">CLK 01</span></div><p data-i18n="valueTraceNote">레지스터는 해당 클록의 WB가 끝난 뒤 값입니다. EX/MEM의 임시 값은 아래 이벤트에 따로 표시합니다.</p><div id="value-trace-content" aria-live="polite"></div></section><div class="evidence"><div class="evidence-kicker"><span class="eyebrow" data-i18n="evidence">EVIDENCE / WHY</span><span class="evidence-line"></span></div><div id="evidence-content"></div></div></section>
+        </div>
+
+        <section class="rules" aria-labelledby="rules-heading"><div class="rules-title"><span class="section-number">04</span><h2 id="rules-heading" data-i18n="modelRules">MODEL RULES</h2></div><div class="rule-grid"><div><span class="rule-index">A /</span><strong data-i18n="ruleAHead">같은 클록의 WB → ID</strong><p data-i18n="ruleABody">레지스터 쓰기가 먼저 보인다고 가정합니다.</p></div><div><span class="rule-index">B /</span><strong data-i18n="ruleBHead">forwarding 시점</strong><p data-i18n="ruleBBody">ALU 값은 EX 뒤, load 값은 MEM 뒤에 전달할 수 있습니다.</p></div><div><span class="rule-index">C /</span><strong data-i18n="ruleCHead">분기 결정 시점</strong><p data-i18n="ruleCBody">이 교육용 모델에서는 분기를 EX에서 결정합니다.</p></div></div></section>
+      </main>
+      <footer><span>PIPELINE DETECTIVE / EDUCATIONAL MODEL</span><span data-i18n="footer">Iowa State CprE 381 프로젝트의 공개 코드에서 착안한 비영리 학습용 퍼즐입니다. 원본 코드와 과제 자료의 권리는 각 권리자에게 있습니다.</span></footer>
+    </div>
+  </div>
+</body>
+</html>
